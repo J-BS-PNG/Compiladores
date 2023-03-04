@@ -1,0 +1,42 @@
+Se debe almacenar de alguna forma [componente léxico, lexema, [Linea, columna]
+ej: 1 + 1 -> [digito, 1, [1,1]]
+	     [operador de suma, +, [1,2]]
+             [digito, 1, [1,3]]
+0 DIGITO
+1 DIGITO
+2 DIGITO
+3 DIGITO
+4 DIGITO
+5 DIGITO
+6 DIGITO
+7 DIGITO
+8 DIGITO
+9 DIGITO
+
++ OP_SUMAR
+- OP_RESTAR
+* OP_MULTIPLICAR
+/ OP_DIVIDIR
+^ OP_ELEVAR
+= OP_ASIGNAR
+
+"(" PARENTESIS_ABRIR
+")" PARENTESIS_CERRAR
+
+calc CALCULAR
+
+¿variables?
+1. Escribir valores especificos que cuando se leen se sabe que será una variable
+X
+Y VARIABLE
+Z
+2. Ponerle un identificador para señalar que es una variable 
+$dato1 VARIABLE
+
+ERRORES
+1.Numero diferente de 0 empieza en 0
+2.Parentesis abierto sin cerrar
+3.Parentesis cerrado sin abrir
+4.Operador sin digito inicial ej +1
+
+
