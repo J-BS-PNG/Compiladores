@@ -39,4 +39,8 @@ ERRORES
 3.Parentesis cerrado sin abrir
 4.Operador sin digito inicial ej +1
 
-
+Pasos para almacenar la informacion 
+1 determinar si el lexema existe en el lenguaje
+2 derterminar cual es el tipo del lexema ej: operador, simbolo, identificador, etc
+3 guardar el tipo, el operador y la posicion en la linea
+4 repeat

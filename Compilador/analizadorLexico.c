@@ -1,4 +1,5 @@
 #include <stdio.h>
+//#include "Diccionario/Diccionario.h"
 
 struct tipo {
     char componente_lexico[100];
@@ -7,21 +8,27 @@ struct tipo {
 
 
 
+
 int main(){
+    /*Obtener operacion*/
+    char comando[20];
+    printf("Igrese la operacion");
+    scanf("%s", comando);
+    printf( "%s\n", comando);
+    /*Crear diccionario*/
+    //Diccionario* operadores = diccionario_nuevo();
+
     /*Digitos*/
     
 
     /*Operaciones*/
-    struct tipo sumar = {"op_sumar", "+"};
+    /*struct tipo sumar = {"op_sumar", "+"};
     struct tipo restar = {"op_restar", "-"};
     struct tipo multiplicar= {"op_multiplicar", "*"};
     struct tipo dividir = {"op_dividir", "/"};
     struct tipo elevar = {"op_elevar", "^"};
-    struct tipo asignar = {"op_asignar", "="};
+    struct tipo asignar = {"op_asignar", "="};*/
 
-    printf(sumar.lexema);
-    
-        /* data */
         
 
     /*
