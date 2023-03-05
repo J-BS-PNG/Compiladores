@@ -1,38 +1,53 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-
-
-int contiene(char *arr[], char componenteLexico[]){
-    //printf(componenteLexico);
-    for (int i = 0; i < sizeof(arr); i++){
-        printf(arr[i]);
-        /*if(arr[i] == componenteLexico){
-            return 1; //true
-        }*/
-    }
-    return 0; //false
-};
-
+#include <string.h>
 
 int main(){
-    /*Obtener operacion*/
-    char comando[20];
-    printf("Igrese la operacion");
-    scanf("%s", comando);
-    printf( "%s\n", comando);
+
+    /*Obtener operacion a procesar*/
+    char  operacion[30];
+    printf("Ingrese la operación: ");
+    gets(operacion);
+    printf("Ingreso: %s", operacion);
+    printf("\n");
 
     /*Crear diccionario*/
     //Diccionario* operadores = diccionario_nuevo();
 
     /*Arrays de las llaves aka los */
-    char *DIGITOS[1][10] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
-    char *OPERADORES[1][6] = {"+", "-", "*", "/", "^", "="};
-    char *PUNTUACION[1][2] = {"(", ")"};
-    char *IDENTIFICADORES[4][2] = {"calc", "$"}; //tome la decisión administrativa de que  vamos a usar el $ para identificar las variables
-    
+    char * DIGITOS[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+    char * OPERADORES[] = {'+', '-', '*', '/', '^', '='};
+    char * PUNTUACION[] = {'(',')'};
+    char * IDENTIFICADORES[] = {'calc', '$'}; //tome la decisión administrativa de que  vamos a usar el $ para identificar las variables
 
-   //printf(strlen(comando));
+    int len = strlen(operacion);
+    for(int i = 0; i < len; i++){
+        //revisar si el caracter se encuentra en digitos    
+        for(int j = 0; j < 10; j++){
+            if(DIGITOS[j] == operacion[i]){
+                printf("El caracter es un digito. Caracter: %c", operacion[i]);
+                printf("\n");
+                break;
+            }
+            if(OPERADORES[j] == operacion[i]){
+                printf("El caracter es un oeprador. Caracter: %c", operacion[i]);
+                printf("\n");  
+                break;            
+            }
+            if(PUNTUACION[j] == operacion[i]){
+                printf("El caracter es puntuacion. Caracter: %c", operacion[i]);
+                printf("\n");   
+                break;           
+            }
+            if(IDENTIFICADORES[j] == operacion[i]){
+                printf("El caracter es IDENTIFICADOR. Caracter: %c", operacion[i]);
+                printf("\n");   
+                break;           
+            }
+        }
+        
+    }
+
     
     /*Operaciones*/
     /*struct tipo sumar = {"op_sumar", "+"};
@@ -62,8 +77,6 @@ int main(){
                     
             
     */
-
-    printf("Hello world");
 
     return 0;
 }
