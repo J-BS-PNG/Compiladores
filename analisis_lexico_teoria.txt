@@ -2,6 +2,9 @@ Se debe almacenar de alguna forma [componente léxico, lexema, [Linea, columna]
 ej: 1 + 1 -> [digito, 1, [1,1]]
 	     [operador de suma, +, [1,2]]
              [digito, 1, [1,3]]
+
+
+NUMERO
 0 DIGITO
 1 DIGITO
 2 DIGITO
@@ -13,6 +16,7 @@ ej: 1 + 1 -> [digito, 1, [1,1]]
 8 DIGITO
 9 DIGITO
 
+OPERADOR
 + OP_SUMAR
 - OP_RESTAR
 * OP_MULTIPLICAR
@@ -20,9 +24,12 @@ ej: 1 + 1 -> [digito, 1, [1,1]]
 ^ OP_ELEVAR
 = OP_ASIGNAR
 
+
+PUNTUACION
 "(" PARENTESIS_ABRIR
 ")" PARENTESIS_CERRAR
 
+IDENTIFICADORES
 calc CALCULAR
 
 ¿variables?
