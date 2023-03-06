@@ -10,6 +10,15 @@ Diccionario *diccionario_nuevo(void){
     return D;
 }
 
+char *diccionario_obtenerValor(Diccionario *D, char *llave){
+    for (int i = 0; i < D->tamanno; ++i){
+        if(D->pareja[i]->llave == llave){
+            return D->pareja[i]->valor;
+        }
+    }
+    return NULL;
+}
+
 //Agrega datos al diccionario dando la llave y el valor
 void diccionario_agrega(Diccionario *D, const char *llave, const char *valor){
     diccionario_aumenta(&D, 1);
