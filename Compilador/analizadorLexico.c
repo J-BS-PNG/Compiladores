@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+//#include "Diccionario/diccionario.h"
+
+struct pos {
+    int x;
+    int y;
+};
 
 int main(){
 
@@ -12,7 +18,7 @@ int main(){
     printf("\n");
 
     /*Crear diccionario*/
-    //Diccionario* operadores = diccionario_nuevo();
+  //  Diccionario* operadores = diccionario_nuevo();
 
     /*Arrays de las llaves aka los */
     char * DIGITOS[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
@@ -20,12 +26,26 @@ int main(){
     char * PUNTUACION[] = {'(',')'};
     char * IDENTIFICADORES[] = {'calc', '$'}; //tome la decisión administrativa de que  vamos a usar el $ para identificar las variables
 
+    int x;
     int len = strlen(operacion);
     for(int i = 0; i < len; i++){
         //revisar si el caracter se encuentra en digitos    
         for(int j = 0; j < 10; j++){
             if(DIGITOS[j] == operacion[i]){
-                printf("El caracter es un digito. Caracter: %c", operacion[i]);
+                char * num[10] = {};
+                x = 0;
+                while(DIGITOS[j] == operacion[i]){
+                    printf("El caracter es un digito. Caracter: %c", operacion[i]);
+                    printf("\n");
+                    num[x] = operacion[i];
+                    x++;
+                    j++;
+                    i++;
+                }
+                for (int y = 0; y < 3; y++){
+                        
+                    printf("%c", num[y]);
+                }
                 printf("\n");
                 break;
             }
