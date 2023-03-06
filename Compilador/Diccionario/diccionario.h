@@ -20,6 +20,9 @@ struct Diccionario
 //Crea un diccionario
 Diccionario *diccionario_nuevo(void);
 
+//obtener un valor
+char *diccionario_obtenerValor(Diccionario *D, char *llave);
+
 //Agrega datos al diccionario dando la llave y el valor
 void diccionario_agrega(Diccionario *D, const char *llave, const char *valor);
 
@@ -34,6 +37,7 @@ void diccionario_copia(const Diccionario *Do, Diccionario *Dd, int unidades);
 
 //Libera la memoria
 void diccionario_libera(Diccionario *D);
+
 
 //inicializacion
 void diccionario_inicializa_contenido(Diccionario *D);
