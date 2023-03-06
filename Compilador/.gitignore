@@ -1,0 +1,4 @@
+*.o
+prog
+compilador/Diccionario/*.o
+compilador/Diccionario/prog
