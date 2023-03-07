@@ -125,8 +125,8 @@ bool estaIdentificador(char c){
 }
 
 int main(){
-
-    Tokens* misTokens= crear_token(NULL, NULL, NULL, NULL);//token vacio para inicializar la estructura
+//PRUEBAS TOKENS
+ /*   Tokens* misTokens= crear_token(NULL, NULL, NULL, NULL);//token vacio para inicializar la estructura
     misTokens = agregar_token(misTokens, '5', "int", 0, 5);
     printToken(misTokens);
     printf("\n");
@@ -145,14 +145,14 @@ int main(){
     
     misTokens =getPastToken(misTokens);
     printToken(misTokens);
-    printf("\n");
+    printf("\n");*/
 
     /*Tokens* iterador;
 
     for(iterador = misTokens; NULL != iterador; iterador = iterador->next){
         printf("%s", iterador->token);
     }*/
-
+/********************************************************************************************/
     //printf("%s\n", tabla[1].token);
 
     /*Obtener operacion a procesar*/
@@ -182,11 +182,10 @@ int main(){
     diccionario_agrega(identificador_dic, "calc", "hacer_calculo");
     diccionario_agrega(identificador_dic, '$', "identificar_variable");
 
-    // columnas: token, tipo, posicion en la linea, en caso de ser variable valor
+    Tokens* tokenActual = crear_token(NULL, NULL, NULL, NULL); //se inicializan los token y el primero se establece como null
 
-    int y; //posicion en la linea
-    int row = 0;
-    int column = 0;
+    int y = 0; //posicion en la linea
+    int entero; //valor entero de los numeros y las variables
     int len = strlen(operacion);//tamaño de la linea
     char num[10];//variable para los numeros no se pueden ingresar numeros de mas de 10 digitos
     const char *tipo; // tipo de token especifico
@@ -200,28 +199,50 @@ int main(){
             if(num != '\0'){ 
                 //si la variable num no esta vacia guardar el numero
                 printf("Numero:%s\n",num);
-                
-                
-
+                //convertir el numero a entero
+                entero = atoi(num);
+                //guardar en token
+                tokenActual = agregar_token(tokenActual, num, "int", y, entero);
+                printToken(tokenActual);
+                //aumentar la posicion de la linea
+                y++;
+                entero = 0;
                 memset(num, 0, 10); // limpia el string
                 
             }
-        
+
+            //guardar en token
+            //aumentar la posicion de la linea
             printf("El caracter es un operador. Caracter: %c\n", operacion[i]);
             tipo = diccionario_obtenerValor(operadores_dic, operacion[i]);//obtiene la descripcion del token
-            printf("El caracter es de tipo: %s", tipo);
+            tokenActual = agregar_token(tokenActual, operacion[i], tipo, y, NULL);
+            printToken(tokenActual);
+            y++;
+            printf("\nEl caracter es de tipo: %s", tipo);
             printf("\n"); 
         }
         else if (estaPuntacion(operacion[i])){//si eltoken esta en la lista puntuación
             if(num != '\0'){
                 //si la variable num no esta vacia guardar el numero
                 printf("Numero:%s\n",num);
+                //convertir el numero a entero
+                entero = atoi(num);
+                //guardar en token
+                tokenActual = agregar_token(tokenActual, num, "int", y, entero);
+                printToken(tokenActual);
+                //aumentar la posicion de la linea
+                y++;
+                entero = 0;
                 memset(num, 0, 10); // limpia el string
             }
-            
+            //guardar en token
+            //aumentar la posicion de la linea
             printf("El caracter es puntuacion. Caracter: %c\n", operacion[i]);
             tipo = diccionario_obtenerValor(puntuacion_dic, operacion[i]);//obtiene la descripcion del token
-            printf("El caracter es de tipo: %s", tipo);
+            tokenActual = agregar_token(tokenActual, operacion[i], tipo, y, NULL);
+            printToken(tokenActual);
+            y++;
+            printf("\nEl caracter es de tipo: %s", tipo);
             printf("\n");   
             
         }
@@ -229,23 +250,47 @@ int main(){
             if(num != '\0'){
                 //si la variable num no esta vacia guardar el numero
                 printf("Numero:%s\n",num);
+                //convertir el numero a entero
+                entero = atoi(num);
+                //guardar en token
+                tokenActual = agregar_token(tokenActual, num, "int", y, entero);
+                printToken(tokenActual);
+                //aumentar la posicion de la linea
+                y++;
+                entero = 0;
                 memset(num, 0, 10); // limpia el string
             }
             
+            //guardar en token
+            //aumentar la posicion de la linea
+
             printf("El caracter es IDENTIFICADOR. Caracter: %c", operacion[i]);
             tipo = diccionario_obtenerValor(identificador_dic, operacion[i]); // obtiene la descripcion del token 
-            printf("El caracter es de tipo: %s", tipo);
+            y++;
+            printf("\nEl caracter es de tipo: %s", tipo);
             printf("\n"); 
         }
 
         if(i == len-1){
-            //guardar el ultimo numero
+            //si la variable num no esta vacia guardar el numero
             printf("Numero:%s\n",num);
+            //convertir el numero a entero
+            entero = atoi(num);
+            //guardar en token
+            tokenActual = agregar_token(tokenActual, num, "int", y, entero);
+            printToken(tokenActual);
+            //aumentar la posicion de la linea
+            y++;
+            entero = 0;
+            memset(num, 0, 10); // limpia el string
         }
-        if(i != len-1){
-            //ampliar la tabla
-        }   
     }
+    Tokens* iterador;
+    for(iterador = tokenActual; NULL != iterador; iterador = iterador->next){
+        printf("%c", iterador->token);
+    }
+    
+
 
 
     return 0;
