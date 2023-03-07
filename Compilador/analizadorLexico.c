@@ -4,23 +4,86 @@
 #include <stdbool.h>
 #include "Diccionario/diccionario.h"
 
-struct pos {
-    int x;
-    int y;
-};
+//************************************************************************************
+// estructura que almacena los datos de los tokens
+///me volé
+typedef struct 
+{
+    char*token;
+    char* tipo;
+    int* posY;
+    int* val;
 
+    struct Token* past;
+    struct Token* next;
+
+}Tokens;
+
+Tokens* crear_token(char* pToken, char* pTipo, int* pPosY, int* pVal){
+    Tokens* newToken = malloc(sizeof(Tokens));
+    if(NULL != newToken){
+        newToken->token = pToken;
+        newToken->tipo = pTipo;
+        newToken->posY = pPosY;
+        newToken->val = pVal;
+        newToken->past = NULL;
+        newToken->next = NULL;
+    }
+    return newToken;
+
+}
+
+Tokens* agregar_token(Tokens* tablaTokens, char* pToken, char* pTipo, int* pPosY, int* pVal){
+    Tokens* newToken = crear_token(pToken, pTipo, pPosY, pVal);
+    if(NULL != newToken){
+        tablaTokens->next = newToken;
+        newToken->past = tablaTokens;
+    }
+    return newToken;
+
+}
+
+void printToken(Tokens* tablaTokens){
+    printf(" %c ", tablaTokens->token);
+    printf(" %s ", tablaTokens->tipo);
+    printf(" %i ", tablaTokens->posY);
+    printf(" %i ", tablaTokens->val);
+
+}
+
+Tokens* getPastToken(Tokens* tablaTokens){
+    if(tablaTokens->past == NULL){
+        printf("NO EXISTE TOKEN ANTERIOR, INICIO DE LA LISTA");
+        return tablaTokens;
+    }
+
+    return tablaTokens->past;
+}
+
+Tokens* getNextToken(Tokens* tablaTokens){
+    if(tablaTokens->next == NULL){
+        printf("NO EXISTE TOKEN SIGUIENTE, FINAL DE LA LISTA");
+        return tablaTokens;
+    }
+    
+    return tablaTokens->next;
+}
+
+//************************************************************************************************
 void append_str(char str[] , char c){
      auto char arr[2] = {c , '\0'};
      strcat(str , arr);
 }
 
 
-/*Arrays de las llaves aka los */
+/*Arrays de las llaves*/
     char *DIGITOS[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
     char *OPERADORES[] = {'+', '-', '*', '/', '^', '='};
     char *PUNTUACION[] = {'(',')',','};
-    char *IDENTIFICADORES[] = {'calc', '$'}; //tome la decisión administrativa de que  vamos a usar el $ para identificar las variables
+    char *IDENTIFICADORES[] = {"calc", '$'}; //tome la decisión administrativa de que  vamos a usar el $ para identificar las variables
 
+
+//Funciones que revisan si el token que se esta revizando existe en el lenguaje
 bool estaDigito(char c){
     for (int i = 0; i < 10; i++)
     {
@@ -42,7 +105,7 @@ bool estaOperador(char c){
 }
 
 bool estaPuntacion(char c){
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 3; i++)
     {
         if(PUNTUACION[i] == c){
             return true;
@@ -63,106 +126,127 @@ bool estaIdentificador(char c){
 
 int main(){
 
+    Tokens* misTokens= crear_token(NULL, NULL, NULL, NULL);//token vacio para inicializar la estructura
+    misTokens = agregar_token(misTokens, '5', "int", 0, 5);
+    printToken(misTokens);
+    printf("\n");
+
+    misTokens = agregar_token(misTokens, '+', "op_suma", 1, NULL);
+    printToken(misTokens);
+    printf("\n");
+
+    misTokens = agregar_token(misTokens, '8', "int", 2, 8);
+    printToken(misTokens);
+    printf("\n");
+
+    misTokens =getNextToken(misTokens);
+    printToken(misTokens);
+    printf("\n");
+    
+    misTokens =getPastToken(misTokens);
+    printToken(misTokens);
+    printf("\n");
+
+    /*Tokens* iterador;
+
+    for(iterador = misTokens; NULL != iterador; iterador = iterador->next){
+        printf("%s", iterador->token);
+    }*/
+
+    //printf("%s\n", tabla[1].token);
+
     /*Obtener operacion a procesar*/
     char  operacion[30];
     printf("Ingrese la operación: ");
     gets(operacion);
-    printf("Ingreso: %s", operacion);
-    printf("\n");
+
 
     /*Crear diccionarios e inicializarlos*/
     Diccionario *operadores_dic = diccionario_nuevo();
 
-    diccionario_agrega(operadores_dic, "+", "op_sumar");
-    diccionario_agrega(operadores_dic, "-", "op_restar");
-    diccionario_agrega(operadores_dic, "/", "op_dividir");
-    diccionario_agrega(operadores_dic, "*", "op_multiplicar");
-    diccionario_agrega(operadores_dic, "^", "op_elevar");
-    diccionario_agrega(operadores_dic, "=", "op_asignacion");
+    diccionario_agrega(operadores_dic, '+', "op_sumar");
+    diccionario_agrega(operadores_dic, '-', "op_restar");
+    diccionario_agrega(operadores_dic, '/', "op_dividir");
+    diccionario_agrega(operadores_dic, '*', "op_multiplicar");
+    diccionario_agrega(operadores_dic, '^', "op_elevar");
+    diccionario_agrega(operadores_dic, '=', "op_asignacion");
 
     Diccionario *puntuacion_dic = diccionario_nuevo();
 
-    diccionario_agrega(puntuacion_dic, "(", "parentesis_abrir");
-    diccionario_agrega(puntuacion_dic, ")", "parentesis_cerrar");
-    diccionario_agrega(puntuacion_dic, ",", "separar");
+    diccionario_agrega(puntuacion_dic, '(', "parentesis_abrir");
+    diccionario_agrega(puntuacion_dic, ')', "parentesis_cerrar");
+    diccionario_agrega(puntuacion_dic, ',', "separar");
 
     Diccionario *identificador_dic = diccionario_nuevo();
 
     diccionario_agrega(identificador_dic, "calc", "hacer_calculo");
-    diccionario_agrega(identificador_dic, "$", "identificar_variable");
+    diccionario_agrega(identificador_dic, '$', "identificar_variable");
 
-
-    char tabla[14][4];
     // columnas: token, tipo, posicion en la linea, en caso de ser variable valor
 
     int y; //posicion en la linea
-    int len = strlen(operacion);
-    char num[10];
-    char *tipo; // tipo de token especifico
+    int row = 0;
+    int column = 0;
+    int len = strlen(operacion);//tamaño de la linea
+    char num[10];//variable para los numeros no se pueden ingresar numeros de mas de 10 digitos
+    const char *tipo; // tipo de token especifico
+    
     for(int i = 0; i < len; i++){
-        //revisar si el caracter se encuentra en digitos
-        // printf("Numero: %i\n", i);
-        if(estaDigito(operacion[i])){
-            append_str(num, operacion[i]);
-        }else if (estaOperador(operacion[i])){
-            if(num != '\0'){
+
+        if(estaDigito(operacion[i])){//si el token esta en la lista digitos
+            append_str(num, operacion[i]); //seagrega a la variable num
+        }
+        else if (estaOperador(operacion[i])){ //si el token esta en la lista operadores
+            if(num != '\0'){ 
                 //si la variable num no esta vacia guardar el numero
                 printf("Numero:%s\n",num);
+                
+                
+
+                memset(num, 0, 10); // limpia el string
+                
             }
-            memset(num, 0, 10); // limpia el string
-            printf("El caracter es un operador. Caracter: %c", operacion[i]);
-            tipo = diccionario_obtenerValor(operadores_dic, operacion[i]);
+        
+            printf("El caracter es un operador. Caracter: %c\n", operacion[i]);
+            tipo = diccionario_obtenerValor(operadores_dic, operacion[i]);//obtiene la descripcion del token
             printf("El caracter es de tipo: %s", tipo);
             printf("\n"); 
-        }else if (estaPuntacion(operacion[i])){
+        }
+        else if (estaPuntacion(operacion[i])){//si eltoken esta en la lista puntuación
             if(num != '\0'){
                 //si la variable num no esta vacia guardar el numero
                 printf("Numero:%s\n",num);
+                memset(num, 0, 10); // limpia el string
             }
             
-            printf("El caracter es puntuacion. Caracter: %c", operacion[i]);
-            tipo = diccionario_obtenerValor(puntuacion_dic, operacion[i]);
-            
+            printf("El caracter es puntuacion. Caracter: %c\n", operacion[i]);
+            tipo = diccionario_obtenerValor(puntuacion_dic, operacion[i]);//obtiene la descripcion del token
+            printf("El caracter es de tipo: %s", tipo);
             printf("\n");   
-        }else if(estaIdentificador(operacion[i])){
+            
+        }
+        else if(estaIdentificador(operacion[i])){ ////si el token esta en la lista identificador
+            if(num != '\0'){
+                //si la variable num no esta vacia guardar el numero
+                printf("Numero:%s\n",num);
+                memset(num, 0, 10); // limpia el string
+            }
+            
             printf("El caracter es IDENTIFICADOR. Caracter: %c", operacion[i]);
+            tipo = diccionario_obtenerValor(identificador_dic, operacion[i]); // obtiene la descripcion del token 
+            printf("El caracter es de tipo: %s", tipo);
             printf("\n"); 
         }
 
         if(i == len-1){
+            //guardar el ultimo numero
             printf("Numero:%s\n",num);
+        }
+        if(i != len-1){
+            //ampliar la tabla
         }   
     }
 
-    
-    /*Operaciones*/
-    /*struct tipo sumar = {"op_sumar", "+"};
-    struct tipo restar = {"op_restar", "-"};
-    struct tipo multiplicar= {"op_multiplicar", "*"};
-    struct tipo dividir = {"op_dividir", "/"};
-    struct tipo elevar = {"op_elevar", "^"};
-    struct tipo asignar = {"op_asignar", "="};*/
-
-        
-
-    /*
-    Abrir archivo
-    Procesar todas las lineas del documento
-        Procesar cada palabra de la linea
-            Si no es un " ":
-                si es numero:
-                    mientras sea un digito guardarlo como uno solo
-                    guardarlo como numero y su posicion
-                si es operador:
-                    determinar que tipo de operaddor es
-                    guardarlo con su tipo y posición
-                si es puntuacion
-                si es identificador:
-                    si es var:
-                        el siguiente es variable
-                    
-            
-    */
 
     return 0;
 }
