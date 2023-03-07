@@ -9,13 +9,13 @@
 ///me volé
 typedef struct 
 {
-    char*token;
+    char* token;
     char* tipo;
     int* posY;
     int* val;
 
-    struct Token* past;
-    struct Token* next;
+    struct Tokens* past;
+    struct Tokens* next;
 
 }Tokens;
 
@@ -44,7 +44,7 @@ Tokens* agregar_token(Tokens* tablaTokens, char* pToken, char* pTipo, int* pPosY
 }
 
 void printToken(Tokens* tablaTokens){
-    printf(" %c ", tablaTokens->token);
+    printf(" %s ", tablaTokens->token);
     printf(" %s ", tablaTokens->tipo);
     printf(" %i ", tablaTokens->posY);
     printf(" %i ", tablaTokens->val);
@@ -179,7 +179,7 @@ int main(){
 
     Diccionario *identificador_dic = diccionario_nuevo();
 
-    diccionario_agrega(identificador_dic, "calc", "hacer_calculo");
+    diccionario_agrega(identificador_dic, "calc", "hacer_calculo"); 
     diccionario_agrega(identificador_dic, '$', "identificar_variable");
 
     Tokens* tokenActual = crear_token(NULL, NULL, NULL, NULL); //se inicializan los token y el primero se establece como null
@@ -191,7 +191,6 @@ int main(){
     const char *tipo; // tipo de token especifico
     
     for(int i = 0; i < len; i++){
-
         if(estaDigito(operacion[i])){//si el token esta en la lista digitos
             append_str(num, operacion[i]); //seagrega a la variable num
         }
@@ -210,12 +209,13 @@ int main(){
                 memset(num, 0, 10); // limpia el string
                 
             }
-
             //guardar en token
             //aumentar la posicion de la linea
             printf("El caracter es un operador. Caracter: %c\n", operacion[i]);
             tipo = diccionario_obtenerValor(operadores_dic, operacion[i]);//obtiene la descripcion del token
-            tokenActual = agregar_token(tokenActual, operacion[i], tipo, y, NULL);
+            char operadorS[2] = "";
+            append_str(operadorS, operacion[i]); 
+            tokenActual = agregar_token(tokenActual, operadorS, tipo, y, NULL);
             printToken(tokenActual);
             y++;
             printf("\nEl caracter es de tipo: %s", tipo);
@@ -234,12 +234,14 @@ int main(){
                 y++;
                 entero = 0;
                 memset(num, 0, 10); // limpia el string
-            }
+            } 
             //guardar en token
             //aumentar la posicion de la linea
             printf("El caracter es puntuacion. Caracter: %c\n", operacion[i]);
             tipo = diccionario_obtenerValor(puntuacion_dic, operacion[i]);//obtiene la descripcion del token
-            tokenActual = agregar_token(tokenActual, operacion[i], tipo, y, NULL);
+            char operacionS[2] = "";
+            append_str(operacionS, operacion[i]); 
+            tokenActual = agregar_token(tokenActual, operacionS, tipo, y, NULL);
             printToken(tokenActual);
             y++;
             printf("\nEl caracter es de tipo: %s", tipo);
