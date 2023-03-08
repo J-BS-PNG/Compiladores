@@ -16,6 +16,7 @@ typedef struct
 
     struct Tokens* past;
     struct Tokens* next;
+    
 
 }Tokens;
 
@@ -29,17 +30,27 @@ Tokens* crear_token(char* pToken, char* pTipo, int* pPosY, int* pVal){
         newToken->past = NULL;
         newToken->next = NULL;
     }
+    
     return newToken;
 
 }
 
 Tokens* agregar_token(Tokens* tablaTokens, char* pToken, char* pTipo, int* pPosY, int* pVal){
-    Tokens* newToken = crear_token(pToken, pTipo, pPosY, pVal);
-    if(NULL != newToken){
-        tablaTokens->next = newToken;
-        newToken->past = tablaTokens;
+    if(tablaTokens->token == NULL){
+        tablaTokens->token = pToken;
+        tablaTokens->tipo = pTipo;
+        tablaTokens->posY = pPosY;
+        tablaTokens->val = pVal;
+        return tablaTokens;
+    } else {
+        Tokens* newToken;
+        newToken = crear_token(pToken, pTipo, pPosY, pVal);
+        if(NULL != newToken){
+            tablaTokens->next = newToken;
+            newToken->past = tablaTokens;
+        }
+        return newToken;
     }
-    return newToken;
 
 }
 
@@ -47,7 +58,7 @@ void printToken(Tokens* tablaTokens){
     printf(" %s ", tablaTokens->token);
     printf(" %s ", tablaTokens->tipo);
     printf(" %i ", tablaTokens->posY);
-    printf(" %i ", tablaTokens->val);
+    printf(" %i \n", tablaTokens->val);
 
 }
 
@@ -69,12 +80,21 @@ Tokens* getNextToken(Tokens* tablaTokens){
     return tablaTokens->next;
 }
 
-//************************************************************************************************
-void append_str(char str[] , char c){
-     auto char arr[2] = {c , '\0'};
-     strcat(str , arr);
+Tokens* comeToFirstValue(Tokens* tablaTokens){
+    Tokens* aux;
+    if(tablaTokens->past == NULL){
+        return tablaTokens;
+    }else{
+        return comeToFirstValue(tablaTokens->past);
+    }
 }
 
+//************************************************************************************************
+char* append_str(char str[] , char c){
+    char arr[2] = {c , '\0'};
+    strcat(str , arr);
+    return str;
+}
 
 /*Arrays de las llaves*/
     char *DIGITOS[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
@@ -126,26 +146,34 @@ bool estaIdentificador(char c){
 
 int main(){
 //PRUEBAS TOKENS
- /*   Tokens* misTokens= crear_token(NULL, NULL, NULL, NULL);//token vacio para inicializar la estructura
-    misTokens = agregar_token(misTokens, '5', "int", 0, 5);
-    printToken(misTokens);
-    printf("\n");
+    // Tokens* misTokens= crear_token(NULL, NULL, NULL, NULL);//token vacio para inicializar la estructura
+    // misTokens = agregar_token(misTokens, "5", "int", 0, 5);
+    // printToken(misTokens);
+    // printf("\n");
 
-    misTokens = agregar_token(misTokens, '+', "op_suma", 1, NULL);
-    printToken(misTokens);
-    printf("\n");
+    // misTokens = agregar_token(misTokens, "+", "op_suma", 1, NULL);
+    // printToken(misTokens);
+    // printf("\n");
 
-    misTokens = agregar_token(misTokens, '8', "int", 2, 8);
-    printToken(misTokens);
-    printf("\n");
+    // misTokens = agregar_token(misTokens, "8", "int", 2, 8);
+    // printToken(misTokens);
+    // printf("\n");
 
-    misTokens =getNextToken(misTokens);
-    printToken(misTokens);
-    printf("\n");
+    // misTokens =getNextToken(misTokens);
+    // printToken(misTokens);
+    // printf("\n");
     
-    misTokens =getPastToken(misTokens);
-    printToken(misTokens);
-    printf("\n");*/
+    // misTokens =getPastToken(misTokens);
+    // printToken(misTokens);
+    // printf("\n");
+
+    // misTokens =getPastToken(misTokens);
+    // printToken(misTokens);
+    // printf("\n");
+
+    // misTokens =getPastToken(misTokens);
+    // printToken(misTokens);
+    // printf("\n");
 
     /*Tokens* iterador;
 
@@ -158,7 +186,8 @@ int main(){
     /*Obtener operacion a procesar*/
     char  operacion[30];
     printf("Ingrese la operación: ");
-    gets(operacion);
+    scanf("%s", &operacion);
+    //gets(operacion);
 
 
     /*Crear diccionarios e inicializarlos*/
@@ -185,63 +214,61 @@ int main(){
     Tokens* tokenActual = crear_token(NULL, NULL, NULL, NULL); //se inicializan los token y el primero se establece como null
 
     int y = 0; //posicion en la linea
-    int entero; //valor entero de los numeros y las variables
+    
     int len = strlen(operacion);//tamaño de la linea
-    char num[10];//variable para los numeros no se pueden ingresar numeros de mas de 10 digitos
     const char *tipo; // tipo de token especifico
+    
     
     for(int i = 0; i < len; i++){
         if(estaDigito(operacion[i])){//si el token esta en la lista digitos
-            append_str(num, operacion[i]); //seagrega a la variable num
+            char num[10] = "";//variable para los numeros no se pueden ingresar numeros de mas de 10 digitos
+            int entero = 0; //valor entero de los numeros y las variables
+            int j = i;
+            printf("num: %s", num);
+            while (j < len && estaDigito(operacion[j]))
+            {
+                append_str(num, operacion[j]); //seagrega a la variable num
+                j++;
+            }
+            //convertir el numero a entero
+            entero = atoi(num);
+
+            //guardar en token
+            char *numDinamico = (char*) malloc(strlen(num)*sizeof(char));
+            strcpy(numDinamico, num);
+            tokenActual = agregar_token(tokenActual, numDinamico, "int", y, entero);
+            printToken(tokenActual);
+            //aumentar la posicion de la linea
+            i = j-1;
+            y++;
         }
         else if (estaOperador(operacion[i])){ //si el token esta en la lista operadores
-            if(num != '\0'){ 
-                //si la variable num no esta vacia guardar el numero
-                printf("Numero:%s\n",num);
-                //convertir el numero a entero
-                entero = atoi(num);
-                //guardar en token
-                tokenActual = agregar_token(tokenActual, num, "int", y, entero);
-                printToken(tokenActual);
-                //aumentar la posicion de la linea
-                y++;
-                entero = 0;
-                memset(num, 0, 10); // limpia el string
-                
-            }
             //guardar en token
             //aumentar la posicion de la linea
             printf("El caracter es un operador. Caracter: %c\n", operacion[i]);
             tipo = diccionario_obtenerValor(operadores_dic, operacion[i]);//obtiene la descripcion del token
             char operadorS[2] = "";
-            append_str(operadorS, operacion[i]); 
-            tokenActual = agregar_token(tokenActual, operadorS, tipo, y, NULL);
+            append_str(operadorS, operacion[i]);
+            char *operadorDinamico = (char*) malloc(2*sizeof(char));
+            strcpy(operadorDinamico, operadorS);
+            tokenActual = agregar_token(tokenActual, operadorDinamico, tipo, y, NULL);
             printToken(tokenActual);
+            Tokens *nuevo = getPastToken(tokenActual);
+            printToken(nuevo);
             y++;
             printf("\nEl caracter es de tipo: %s", tipo);
             printf("\n"); 
         }
         else if (estaPuntacion(operacion[i])){//si eltoken esta en la lista puntuación
-            if(num != '\0'){
-                //si la variable num no esta vacia guardar el numero
-                printf("Numero:%s\n",num);
-                //convertir el numero a entero
-                entero = atoi(num);
-                //guardar en token
-                tokenActual = agregar_token(tokenActual, num, "int", y, entero);
-                printToken(tokenActual);
-                //aumentar la posicion de la linea
-                y++;
-                entero = 0;
-                memset(num, 0, 10); // limpia el string
-            } 
             //guardar en token
             //aumentar la posicion de la linea
             printf("El caracter es puntuacion. Caracter: %c\n", operacion[i]);
             tipo = diccionario_obtenerValor(puntuacion_dic, operacion[i]);//obtiene la descripcion del token
-            char operacionS[2] = "";
-            append_str(operacionS, operacion[i]); 
-            tokenActual = agregar_token(tokenActual, operacionS, tipo, y, NULL);
+            char puntuacionS[2] = "";
+            append_str(puntuacionS, operacion[i]);
+            char *puntuacionDinamico = (char*) malloc(2*sizeof(char));
+            strcpy(puntuacionDinamico, puntuacionS);
+            tokenActual = agregar_token(tokenActual, puntuacionDinamico, tipo, y, NULL);
             printToken(tokenActual);
             y++;
             printf("\nEl caracter es de tipo: %s", tipo);
@@ -249,47 +276,22 @@ int main(){
             
         }
         else if(estaIdentificador(operacion[i])){ ////si el token esta en la lista identificador
-            if(num != '\0'){
-                //si la variable num no esta vacia guardar el numero
-                printf("Numero:%s\n",num);
-                //convertir el numero a entero
-                entero = atoi(num);
-                //guardar en token
-                tokenActual = agregar_token(tokenActual, num, "int", y, entero);
-                printToken(tokenActual);
-                //aumentar la posicion de la linea
-                y++;
-                entero = 0;
-                memset(num, 0, 10); // limpia el string
-            }
-            
             //guardar en token
             //aumentar la posicion de la linea
-
             printf("El caracter es IDENTIFICADOR. Caracter: %c", operacion[i]);
             tipo = diccionario_obtenerValor(identificador_dic, operacion[i]); // obtiene la descripcion del token 
             y++;
             printf("\nEl caracter es de tipo: %s", tipo);
             printf("\n"); 
         }
-
-        if(i == len-1){
-            //si la variable num no esta vacia guardar el numero
-            printf("Numero:%s\n",num);
-            //convertir el numero a entero
-            entero = atoi(num);
-            //guardar en token
-            tokenActual = agregar_token(tokenActual, num, "int", y, entero);
-            printToken(tokenActual);
-            //aumentar la posicion de la linea
-            y++;
-            entero = 0;
-            memset(num, 0, 10); // limpia el string
-        }
     }
     Tokens* iterador;
-    for(iterador = tokenActual; NULL != iterador; iterador = iterador->next){
-        printf("%c", iterador->token);
+    // printf("Actual: %s", tokenActual->token);
+    // printf("Actual: %s", tokenActual->tipo);
+    // printf("Empieza todo\n");
+    printf("\nPresentacon de datos");
+    for(iterador = comeToFirstValue(tokenActual); NULL != iterador; iterador = iterador->next){
+        printToken(iterador);
     }
     
 
