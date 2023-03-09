@@ -3,7 +3,7 @@ OBJS = Diccionario/diccionario.o analizadorLexico.o
 CFLAGS = -Wall
 
 $(TARGET) : $(OBJS)
-	@gcc $(CFLAGS) $(OBJS) -o $(TARGET)
+	@gcc $(CFLAGS) $(OBJS) -lm -o $(TARGET)
 
 analizadorLexico.o : analizadorLexico.c Diccionario/diccionario.h
 

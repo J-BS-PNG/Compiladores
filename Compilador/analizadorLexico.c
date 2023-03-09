@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <math.h>
 #include "Diccionario/diccionario.h"
 
 //************************************************************************************
@@ -103,7 +104,8 @@ char* append_str(char str[] , char c){
     char *IDENTIFICADORES[] = {"calc", '$'}; //tome la decisión administrativa de que  vamos a usar el $ para identificar las variables
 
 
-//Funciones que revisan si el token que se esta revizando existe en el lenguaje
+//Función que revisa si es un digito valido devuelve true
+//sino false
 bool estaDigito(char c){
     for (int i = 0; i < 10; i++)
     {
@@ -114,6 +116,8 @@ bool estaDigito(char c){
     return false;
 }
 
+//Funcón que se confirma si es un operador devuelve True
+//sino false
 bool estaOperador(char c){
     for (int i = 0; i < 6; i++)
     {
@@ -124,6 +128,8 @@ bool estaOperador(char c){
     return false;
 }
 
+//Función que confirma si es puntación devuelve true
+//sino devuelve false
 bool estaPuntacion(char c){
     for (int i = 0; i < 3; i++)
     {
@@ -134,6 +140,8 @@ bool estaPuntacion(char c){
     return false;
 }
 
+//Función que se confirma si es un identificador devuelve true
+//sino false
 bool estaIdentificador(char c){
     for (int i = 0; i < 2; i++)
     {
@@ -142,6 +150,84 @@ bool estaIdentificador(char c){
         }
     }
     return false;
+}
+//Funcion para el analizar semantico
+
+Tokens *expTokemizada;
+
+Tokens *getToken(){
+    Tokens *token = expTokemizada;
+    expTokemizada = getNextToken(expTokemizada);
+    return token;
+}
+
+void retToken(){
+    expTokemizada = getPastToken(expTokemizada);
+}
+
+bool esNumero(){
+    return false;
+}
+
+//Se declaran antes para no tener errores
+float term();
+float factor();
+float pot();
+
+float expr(){
+    float val = term();
+    Tokens *op = getToken();
+    while(op == "-" || op == "+"){
+        if(op == "-"){
+            val = val - term();
+        }else{
+            val = val + term();
+        }
+        op = getToken();
+    }
+    retToken();
+    return val;
+}
+
+float term(){
+    float val = factor();
+    Tokens *op = getToken();
+    while (op == "*" || op == "/"){
+        if (op == '*'){
+            val = val * factor();
+        }else{
+            val = val / factor();
+        }
+        op = getToken();
+    }
+    retToken();
+    return val;
+}
+
+float factor(){
+    float val = pot();
+    Tokens *op = getToken();
+    while (op == '^'){
+        val = pow(val, pot());
+        op = getToken();
+    }
+    retToken();
+    return val;
+}
+
+float pot(){
+    Tokens *c = getToken();
+    if(esNumero(c)){
+        int newVal = (float)*(c->val);
+        return newVal;
+    }else if(c == '('){
+        float val = expr();
+        if (getToken() != ')'){
+            //tirar error
+        }else{
+            return val;
+        }
+    }
 }
 
 int main(){
@@ -224,7 +310,6 @@ int main(){
             char num[10] = "";//variable para los numeros no se pueden ingresar numeros de mas de 10 digitos
             int entero = 0; //valor entero de los numeros y las variables
             int j = i;
-            printf("num: %s", num);
             while (j < len && estaDigito(operacion[j]))
             {
                 append_str(num, operacion[j]); //seagrega a la variable num
@@ -237,7 +322,7 @@ int main(){
             char *numDinamico = (char*) malloc(strlen(num)*sizeof(char));
             strcpy(numDinamico, num);
             tokenActual = agregar_token(tokenActual, numDinamico, "int", y, entero);
-            printToken(tokenActual);
+            // printToken(tokenActual);
             //aumentar la posicion de la linea
             i = j-1;
             y++;
@@ -245,57 +330,56 @@ int main(){
         else if (estaOperador(operacion[i])){ //si el token esta en la lista operadores
             //guardar en token
             //aumentar la posicion de la linea
-            printf("El caracter es un operador. Caracter: %c\n", operacion[i]);
+            // printf("El caracter es un operador. Caracter: %c\n", operacion[i]);
             tipo = diccionario_obtenerValor(operadores_dic, operacion[i]);//obtiene la descripcion del token
             char operadorS[2] = "";
             append_str(operadorS, operacion[i]);
             char *operadorDinamico = (char*) malloc(2*sizeof(char));
             strcpy(operadorDinamico, operadorS);
             tokenActual = agregar_token(tokenActual, operadorDinamico, tipo, y, NULL);
-            printToken(tokenActual);
+            // printToken(tokenActual);
             Tokens *nuevo = getPastToken(tokenActual);
-            printToken(nuevo);
+            // printToken(nuevo);
             y++;
-            printf("\nEl caracter es de tipo: %s", tipo);
-            printf("\n"); 
+            // printf("\nEl caracter es de tipo: %s", tipo);
+            // printf("\n"); 
         }
         else if (estaPuntacion(operacion[i])){//si eltoken esta en la lista puntuación
             //guardar en token
             //aumentar la posicion de la linea
-            printf("El caracter es puntuacion. Caracter: %c\n", operacion[i]);
+            // printf("El caracter es puntuacion. Caracter: %c\n", operacion[i]);
             tipo = diccionario_obtenerValor(puntuacion_dic, operacion[i]);//obtiene la descripcion del token
             char puntuacionS[2] = "";
             append_str(puntuacionS, operacion[i]);
             char *puntuacionDinamico = (char*) malloc(2*sizeof(char));
             strcpy(puntuacionDinamico, puntuacionS);
             tokenActual = agregar_token(tokenActual, puntuacionDinamico, tipo, y, NULL);
-            printToken(tokenActual);
+            // printToken(tokenActual);
             y++;
-            printf("\nEl caracter es de tipo: %s", tipo);
-            printf("\n");   
+            // printf("\nEl caracter es de tipo: %s", tipo);
+            // printf("\n");   
             
         }
         else if(estaIdentificador(operacion[i])){ ////si el token esta en la lista identificador
             //guardar en token
             //aumentar la posicion de la linea
-            printf("El caracter es IDENTIFICADOR. Caracter: %c", operacion[i]);
+            // printf("El caracter es IDENTIFICADOR. Caracter: %c", operacion[i]);
             tipo = diccionario_obtenerValor(identificador_dic, operacion[i]); // obtiene la descripcion del token 
             y++;
-            printf("\nEl caracter es de tipo: %s", tipo);
-            printf("\n"); 
+            // printf("\nEl caracter es de tipo: %s", tipo);
+            // printf("\n"); 
         }
     }
     Tokens* iterador;
-    // printf("Actual: %s", tokenActual->token);
-    // printf("Actual: %s", tokenActual->tipo);
-    // printf("Empieza todo\n");
-    printf("\nPresentacon de datos");
-    for(iterador = comeToFirstValue(tokenActual); NULL != iterador; iterador = iterador->next){
-        printToken(iterador);
-    }
-    
-
-
+    tokenActual = agregar_token(tokenActual, "#", "Final", y, NULL);
+    //Imprime todos los datos de la estructura que almacena los tokens
+    printf("\nPresentacon de datos\n");
+    expTokemizada = comeToFirstValue(tokenActual);
+    // for(iterador = expTokemizada; NULL != iterador; iterador = iterador->next){
+    //     printToken(iterador);
+    // }
+    // printf("Primero\n");
+    // printToken(expTokemizada);
 
     return 0;
 }
