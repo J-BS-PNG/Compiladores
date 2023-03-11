@@ -13,7 +13,7 @@ typedef struct
     char* token;
     char* tipo;
     int* posY;
-    int* val;
+    int val;
 
     struct Tokens* past;
     struct Tokens* next;
@@ -36,7 +36,7 @@ Tokens* crear_token(char* pToken, char* pTipo, int* pPosY, int* pVal){
 
 }
 
-Tokens* agregar_token(Tokens* tablaTokens, char* pToken, char* pTipo, int* pPosY, int* pVal){
+Tokens* agregar_token(Tokens* tablaTokens, char* pToken, char* pTipo, int* pPosY, int pVal){
     if(tablaTokens->token == NULL){
         tablaTokens->token = pToken;
         tablaTokens->tipo = pTipo;
@@ -151,14 +151,24 @@ bool estaIdentificador(char c){
     }
     return false;
 }
-//Funcion para el analizar semantico
+
+/*
+################################################################################
+#                           Analizardor sintactico                             #
+################################################################################
+*/
 
 Tokens *expTokemizada;
 
+//Función para obtener tokens
 Tokens *getToken(){
-    Tokens *token = expTokemizada;
-    expTokemizada = getNextToken(expTokemizada);
-    return token;
+    if(strcmp(expTokemizada -> token, "#")){
+        Tokens *token = expTokemizada;
+        expTokemizada = getNextToken(expTokemizada);
+        return token;
+    }
+    return expTokemizada;
+    
 }
 
 void retToken(){
@@ -177,8 +187,8 @@ float pot();
 float expr(){
     float val = term();
     Tokens *op = getToken();
-    while(op == "-" || op == "+"){
-        if(op == "-"){
+    while(!strcmp(op -> token, "+") || !strcmp(op -> token, "-")){
+        if(!strcmp(op -> token, "-")){
             val = val - term();
         }else{
             val = val + term();
@@ -192,8 +202,8 @@ float expr(){
 float term(){
     float val = factor();
     Tokens *op = getToken();
-    while (op == "*" || op == "/"){
-        if (op == '*'){
+    while (!strcmp(op -> token, "*") || !strcmp(op -> token, "/")){
+        if (!strcmp(op -> token, "*")){
             val = val * factor();
         }else{
             val = val / factor();
@@ -207,7 +217,7 @@ float term(){
 float factor(){
     float val = pot();
     Tokens *op = getToken();
-    while (op == '^'){
+    while (!strcmp(op -> token, "^")){
         val = pow(val, pot());
         op = getToken();
     }
@@ -217,18 +227,26 @@ float factor(){
 
 float pot(){
     Tokens *c = getToken();
-    if(esNumero(c)){
-        int newVal = (float)*(c->val);
+    if(c->val != NULL){
+        float newVal = (float)(c->val);
         return newVal;
-    }else if(c == '('){
+    }else if(!strcmp(c -> token, "(")){
         float val = expr();
-        if (getToken() != ')'){
-            //tirar error
+        if (strcmp(getToken()->token, ")")){
+            printf("Error");
         }else{
             return val;
         }
+    }else{
+        retToken();
     }
 }
+
+/*
+################################################################################
+#                          FIN ANALIZADOR SINTACTICO                           #
+################################################################################
+*/
 
 int main(){
 //PRUEBAS TOKENS
@@ -375,9 +393,14 @@ int main(){
     //Imprime todos los datos de la estructura que almacena los tokens
     printf("\nPresentacon de datos\n");
     expTokemizada = comeToFirstValue(tokenActual);
-    // for(iterador = expTokemizada; NULL != iterador; iterador = iterador->next){
-    //     printToken(iterador);
-    // }
+    for(iterador = expTokemizada; NULL != iterador; iterador = iterador->next){
+        if(!strcmp(iterador->token, "+")){
+            printToken(iterador);
+        }
+    }
+    //Parte del analizador sintactico
+    float temp = expr();
+    printf("\n%f", temp);
     // printf("Primero\n");
     // printToken(expTokemizada);
 
