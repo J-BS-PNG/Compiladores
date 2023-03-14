@@ -7,7 +7,7 @@ typedef struct Diccionario Diccionario;
 //Estructura de llave valor
 struct Pareja{
     const char *llave;
-    const char *valor;
+    char *valor;
 };
 //Diccionario con datos de la pareja y el tamaño del diccionario.
 
@@ -24,7 +24,7 @@ Diccionario *diccionario_nuevo(void);
 char *diccionario_obtenerValor(Diccionario *D, char *llave);
 
 //Agrega datos al diccionario dando la llave y el valor
-void diccionario_agrega(Diccionario *D, const char *llave, const char *valor);
+void diccionario_agrega(Diccionario *D, const char *llave, char *valor);
 
 //Enseña por consola los datos del diccionario
 void diccionario_muestra(const Diccionario *D);

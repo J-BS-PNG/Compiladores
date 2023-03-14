@@ -1,6 +1,7 @@
 #include "diccionario.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 //Crea un diccionario
 Diccionario *diccionario_nuevo(void){
@@ -12,7 +13,7 @@ Diccionario *diccionario_nuevo(void){
 
 char *diccionario_obtenerValor(Diccionario *D, char *llave){
     for (int i = 0; i < D->tamanno; ++i){
-        if(D->pareja[i]->llave == llave){
+        if(!strcmp(D->pareja[i]->llave, llave)){
             return D->pareja[i]->valor;
         }
     }
@@ -20,7 +21,7 @@ char *diccionario_obtenerValor(Diccionario *D, char *llave){
 }
 
 //Agrega datos al diccionario dando la llave y el valor
-void diccionario_agrega(Diccionario *D, const char *llave, const char *valor){
+void diccionario_agrega(Diccionario *D, const char *llave, char *valor){
     diccionario_aumenta(&D, 1);
     D->pareja[D->tamanno - 1]->llave = llave;
     D->pareja[D->tamanno - 1]->valor = valor;
