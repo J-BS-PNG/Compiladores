@@ -13,7 +13,7 @@ typedef struct
     char* token;
     char* tipo;
     int* posY;
-    int val;
+    float val;
 
     struct Tokens* past;
     struct Tokens* next;
@@ -21,7 +21,7 @@ typedef struct
 
 }Tokens;
 
-Tokens* crear_token(char* pToken, char* pTipo, int* pPosY, int* pVal){
+Tokens* crear_token(char* pToken, char* pTipo, int* pPosY, float pVal){
     Tokens* newToken = malloc(sizeof(Tokens));
     if(NULL != newToken){
         newToken->token = pToken;
@@ -36,7 +36,7 @@ Tokens* crear_token(char* pToken, char* pTipo, int* pPosY, int* pVal){
 
 }
 
-Tokens* agregar_token(Tokens* tablaTokens, char* pToken, char* pTipo, int* pPosY, int pVal){
+Tokens* agregar_token(Tokens* tablaTokens, char* pToken, char* pTipo, int* pPosY, float pVal){
     if(tablaTokens->token == NULL){
         tablaTokens->token = pToken;
         tablaTokens->tipo = pTipo;
@@ -59,7 +59,7 @@ void printToken(Tokens* tablaTokens){
     printf(" %s ", tablaTokens->token);
     printf(" %s ", tablaTokens->tipo);
     printf(" %i ", tablaTokens->posY);
-    printf(" %i \n", tablaTokens->val);
+    printf(" %f \n", tablaTokens->val);
 
 }
 
@@ -140,6 +140,7 @@ bool estaPuntacion(char c){
     return false;
 }
 
+
 //Función que se confirma si es un identificador devuelve true
 //sino false
 bool estaIdentificador(char c){
@@ -171,6 +172,7 @@ Tokens *getToken(){
     
 }
 
+//Retorna posicion del token
 void retToken(){
     expTokemizada = getPastToken(expTokemizada);
 }
@@ -180,6 +182,9 @@ bool esNumero(){
 }
 
 //Se declaran antes para no tener errores
+/*
+
+*/
 float term();
 float factor();
 float pot();
@@ -227,7 +232,7 @@ float factor(){
 
 float pot(){
     Tokens *c = getToken();
-    if(c->val != NULL){
+    if(!strcmp(c ->tipo, "num")){
         float newVal = (float)(c->val);
         return newVal;
     }else if(!strcmp(c -> token, "(")){
@@ -236,6 +241,23 @@ float pot(){
             printf("Error");
         }else{
             return val;
+        }
+    }else if(!strcmp(c ->tipo, "fun")){
+        float val = expr();
+        if (strcmp(getToken()->token, ")")){
+            printf("Error");
+        }else{
+            if(!strcmp(c ->token, "in(")){
+                return log10(val);
+            }else if(!strcmp(c ->token, "sin(")){
+                return sin(val);
+            }else if(!strcmp(c ->token, "cos(")){
+                return cos(val);
+            }else if(!strcmp(c ->token, "exp(")){
+                return exp(val);
+            }else{
+                printf('Error');
+            }
         }
     }else{
         retToken();
@@ -315,46 +337,59 @@ int main(){
     diccionario_agrega(identificador_dic, "calc", "hacer_calculo"); 
     diccionario_agrega(identificador_dic, '$', "identificar_variable");
 
-    Tokens* tokenActual = crear_token(NULL, NULL, NULL, NULL); //se inicializan los token y el primero se establece como null
+    Tokens* tokenActual = crear_token(NULL, NULL, NULL, 0.0); //se inicializan los token y el primero se establece como null
 
     int y = 0; //posicion en la linea
+    int comaFloat  = 0;
+    int error = 0;
     
     int len = strlen(operacion);//tamaño de la linea
     const char *tipo; // tipo de token especifico
     
-    
-    for(int i = 0; i < len; i++){
+    for(int i = 0; i < len && error == 0; i++){
         if(estaDigito(operacion[i])){//si el token esta en la lista digitos
             char num[10] = "";//variable para los numeros no se pueden ingresar numeros de mas de 10 digitos
-            int entero = 0; //valor entero de los numeros y las variables
+            float entero = 0; //valor entero de los numeros y las variables
             int j = i;
-            while (j < len && estaDigito(operacion[j]))
-            {
-                append_str(num, operacion[j]); //seagrega a la variable num
+            while(j < len)
+            {   
+                if(estaDigito(operacion[j])){
+                    append_str(num, operacion[j]); //se agrega a la variable num
+                }else if(operacion[j] == '.'){
+                    if(comaFloat == 0){
+                        append_str(num, operacion[j]);
+                        comaFloat++;
+                    }
+                    else{
+                        error = 1;
+                        break;
+                    }
+                    
+                }else{
+                    break;
+                }
                 j++;
             }
             //convertir el numero a entero
-            entero = atoi(num);
-
+            entero = atof(num);
             //guardar en token
             char *numDinamico = (char*) malloc(strlen(num)*sizeof(char));
             strcpy(numDinamico, num);
-            tokenActual = agregar_token(tokenActual, numDinamico, "int", y, entero);
+            tokenActual = agregar_token(tokenActual, numDinamico, "num", y, entero);
             // printToken(tokenActual);
             //aumentar la posicion de la linea
             i = j-1;
             y++;
         }
         else if (estaOperador(operacion[i])){ //si el token esta en la lista operadores
-            //guardar en token
-            //aumentar la posicion de la linea
+            
             // printf("El caracter es un operador. Caracter: %c\n", operacion[i]);
             tipo = diccionario_obtenerValor(operadores_dic, operacion[i]);//obtiene la descripcion del token
             char operadorS[2] = "";
             append_str(operadorS, operacion[i]);
             char *operadorDinamico = (char*) malloc(2*sizeof(char));
             strcpy(operadorDinamico, operadorS);
-            tokenActual = agregar_token(tokenActual, operadorDinamico, tipo, y, NULL);
+            tokenActual = agregar_token(tokenActual, operadorDinamico, tipo, y, 0.0);
             // printToken(tokenActual);
             Tokens *nuevo = getPastToken(tokenActual);
             // printToken(nuevo);
@@ -363,15 +398,13 @@ int main(){
             // printf("\n"); 
         }
         else if (estaPuntacion(operacion[i])){//si eltoken esta en la lista puntuación
-            //guardar en token
-            //aumentar la posicion de la linea
             // printf("El caracter es puntuacion. Caracter: %c\n", operacion[i]);
             tipo = diccionario_obtenerValor(puntuacion_dic, operacion[i]);//obtiene la descripcion del token
             char puntuacionS[2] = "";
             append_str(puntuacionS, operacion[i]);
             char *puntuacionDinamico = (char*) malloc(2*sizeof(char));
             strcpy(puntuacionDinamico, puntuacionS);
-            tokenActual = agregar_token(tokenActual, puntuacionDinamico, tipo, y, NULL);
+            tokenActual = agregar_token(tokenActual, puntuacionDinamico, tipo, y, 0.0);
             // printToken(tokenActual);
             y++;
             // printf("\nEl caracter es de tipo: %s", tipo);
@@ -379,8 +412,6 @@ int main(){
             
         }
         else if(estaIdentificador(operacion[i])){ ////si el token esta en la lista identificador
-            //guardar en token
-            //aumentar la posicion de la linea
             // printf("El caracter es IDENTIFICADOR. Caracter: %c", operacion[i]);
             tipo = diccionario_obtenerValor(identificador_dic, operacion[i]); // obtiene la descripcion del token 
             y++;
@@ -389,18 +420,21 @@ int main(){
         }
     }
     Tokens* iterador;
-    tokenActual = agregar_token(tokenActual, "#", "Final", y, NULL);
+    tokenActual = agregar_token(tokenActual, "#", "End", y, 0.0);
     //Imprime todos los datos de la estructura que almacena los tokens
     printf("\nPresentacon de datos\n");
     expTokemizada = comeToFirstValue(tokenActual);
     for(iterador = expTokemizada; NULL != iterador; iterador = iterador->next){
-        if(!strcmp(iterador->token, "+")){
-            printToken(iterador);
-        }
+        printToken(iterador);
+    }
+    if(error != 0){
+        printf("Error");
+    }else{
+        float temp = expr();
+        printf("\n%f", temp);
     }
     //Parte del analizador sintactico
-    float temp = expr();
-    printf("\n%f", temp);
+    
     // printf("Primero\n");
     // printToken(expTokemizada);
 
