@@ -17,7 +17,9 @@ char* append_str(char str[] , char c){
     char *OPERADORES[] = {"+", "-", "*", "/", "^", "="};
     char *PUNTUACION[] = {"(",")",","};
     char *IDENTIFICADORES[] = {"calc", "$"}; //tome la decisión administrativa de que  vamos a usar el $ para identificar las variables
+    char *FUNCIONES[] = {"sin", "cos", "pi", "e"}; 
     int error = 0;
+
 
 
 //Función que revisa si es un digito valido devuelve true
@@ -28,6 +30,13 @@ bool estaDigito(char c){
         if(DIGITOS[i][0] == c){
             return true;
         }
+    }
+    return false;
+}
+
+bool estaLetra(char c){
+    if((c >= 'A' && c <= 'Z')||(c >= 'a' && c<= 'z')){
+        return true;
     }
     return false;
 }
@@ -217,6 +226,15 @@ int main(){
     diccionario_agrega(identificador_dic, "calc", "hacer_calculo"); 
     diccionario_agrega(identificador_dic, "$", "identificar_variable");
 
+    Diccionario *funcion_dic = diccionario_nuevo();
+
+    diccionario_agrega(funcion_dic, "sin(", "trigonometrica_sen"); 
+    diccionario_agrega(funcion_dic, "cos(", "trigonometrica_cos");
+    diccionario_agrega(funcion_dic, "exp(", "exponencial");
+    diccionario_agrega(funcion_dic, "ln(", "logaritmo_natural");
+    diccionario_agrega(funcion_dic, "pi", "num"); 
+    diccionario_agrega(funcion_dic, "e", "num");
+
     Tokens* tokenActual = crear_token(NULL, NULL, 0, 0.0); //se inicializan los token y el primero se establece como null
 
     int y = 0; //posicion en la linea
@@ -273,9 +291,6 @@ int main(){
             // printToken(tokenActual);
             y++;
 
-
-            // printf("\nEl caracter es de tipo: %s", tipo);
-            // printf("\n"); 
         }
         else if (estaPuntacion(operacion[i])){//si eltoken esta en la lista puntuación
             // printf("El caracter es puntuacion. Caracter: %c\n", operacion[i]);
@@ -285,19 +300,45 @@ int main(){
             strcpy(puntuacionDinamico, puntuacionS);
             tipo = diccionario_obtenerValor(puntuacion_dic, puntuacionDinamico);//obtiene la descripcion del token
             tokenActual = agregar_token(tokenActual, puntuacionDinamico, (char*)tipo, y, 0.0);
-            // printToken(tokenActual);
             y++;
-            // printf("\nEl caracter es de tipo: %s", tipo);
-            // printf("\n");   
+
 
             
         }
-        else if(estaIdentificador(operacion[i])){ ////si el token esta en la lista identificador
-            // printf("El caracter es IDENTIFICADOR. Caracter: %c", operacion[i]);
-            //tipo = diccionario_obtenerValor(identificador_dic, operacion[i]); // obtiene la descripcion del token 
+        else if(estaLetra(operacion[i])){ ////si el token esta en la lista identificador
+            char palabra[10] = "";//variable para los numeros no se pueden ingresar numeros de mas de 10 digitos
+            //float entero = 0; //valor entero de los numeros y las variables
+            int j = i;
+            while(j < len)
+            {   
+                if(estaLetra(operacion[j])){
+                    append_str(palabra, operacion[j]); //se agrega a la variable num
+                }else if(estaPuntacion(operacion[j])){
+                    append_str(palabra, operacion[j]);
+                
+                }else{
+                    break;
+                }
+                j++;
+            }
+            char *funcionDinamico = (char*) malloc(10*sizeof(char));
+            strcpy(funcionDinamico, palabra);
+            tipo = diccionario_obtenerValor(funcion_dic, funcionDinamico);//obtiene la descripcion del token
+            if(!strcmp(tipo, "num")){
+                if(!strcmp(funcionDinamico, "pi")){
+                    tokenActual = agregar_token(tokenActual, funcionDinamico, (char*)tipo, y, acos(-1.0));
+
+                }else{
+                    tokenActual = agregar_token(tokenActual, funcionDinamico, (char*)tipo, y, 2.718281828459045);
+                }
+            }else{
+                tokenActual = agregar_token(tokenActual, funcionDinamico, (char*)tipo, y, 0.0);
+            }
+            //aumentar la posicion de la linea
+            printf("%s", tipo);
+            i = j-1;
             y++;
-            // printf("\nEl caracter es de tipo: %s", tipo);
-            // printf("\n"); 
+
         }
     }
     tokenActual = agregar_token(tokenActual, "#", "End", y, 0.0);
@@ -305,6 +346,7 @@ int main(){
     printf("\nPresentacon de datos\n");
     expTokemizada = comeToFirstValue(tokenActual);
     printAllTokens(expTokemizada);
+    
     if(error != 0){
         printf("Error");
     }else{
