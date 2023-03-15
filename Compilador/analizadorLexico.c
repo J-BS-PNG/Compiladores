@@ -168,13 +168,13 @@ float pot(){
         }else{
             return val;
         }
-    }else if(!strcmp(c ->tipo, "fun")){
+    }else if(!strcmp(c ->tipo, "trigonometrica_sen") || !strcmp(c ->tipo, "trigonometrica_cos") || !strcmp(c ->tipo, "exponencial") || !strcmp(c ->tipo, "logaritmo_natural")){
         float val = expr();
         if (strcmp(getToken()->token, ")")){
             printf("Error");
         }else{
-            if(!strcmp(c ->token, "in(")){
-                return log10(val);
+            if(!strcmp(c ->token, "ln(")){
+                return log(val);
             }else if(!strcmp(c ->token, "sin(")){
                 return sin(val);
             }else if(!strcmp(c ->token, "cos(")){
@@ -197,14 +197,8 @@ float pot(){
 ################################################################################
 */
 
-int main(){
-    /*Obtener operacion a procesar*/
-    char  operacion[30];
-    printf("Ingrese la operación: ");
-    scanf("%s", operacion);
-    //gets(operacion);
-
-
+void analizadorLexico(char *operacion){
+   
     /*Crear diccionarios e inicializarlos*/
     Diccionario *operadores_dic = diccionario_nuevo();
 
@@ -274,23 +268,19 @@ int main(){
             char *numDinamico = (char*) malloc(strlen(num)*sizeof(char));
             strcpy(numDinamico, num);
             tokenActual = agregar_token(tokenActual, numDinamico, "num", y, entero);
-            // printToken(tokenActual);
             //aumentar la posicion de la linea
             i = j-1;
             y++;
         }
         else if (estaOperador(operacion[i])){ //si el token esta en la lista operadores
             
-            // printf("El caracter es un operador. Caracter: %c\n", operacion[i]);
             char operadorS[2] = "";
             append_str(operadorS, operacion[i]);
             char *operadorDinamico = (char*) malloc(2*sizeof(char));
             strcpy(operadorDinamico, operadorS);
             tipo = diccionario_obtenerValor(operadores_dic, operadorDinamico);//obtiene la descripcion del token
             tokenActual = agregar_token(tokenActual, operadorDinamico, (char*) tipo, y, 0.0);
-            // printToken(tokenActual);
             y++;
-
         }
         else if (estaPuntacion(operacion[i])){//si eltoken esta en la lista puntuación
             // printf("El caracter es puntuacion. Caracter: %c\n", operacion[i]);
@@ -301,8 +291,6 @@ int main(){
             tipo = diccionario_obtenerValor(puntuacion_dic, puntuacionDinamico);//obtiene la descripcion del token
             tokenActual = agregar_token(tokenActual, puntuacionDinamico, (char*)tipo, y, 0.0);
             y++;
-
-
             
         }
         else if(estaLetra(operacion[i])){ ////si el token esta en la lista identificador
@@ -313,9 +301,10 @@ int main(){
             {   
                 if(estaLetra(operacion[j])){
                     append_str(palabra, operacion[j]); //se agrega a la variable num
-                }else if(estaPuntacion(operacion[j])){
+                }else if(operacion[j] == '('){
                     append_str(palabra, operacion[j]);
-                
+                    j++;
+                    break;
                 }else{
                     break;
                 }
@@ -324,35 +313,50 @@ int main(){
             char *funcionDinamico = (char*) malloc(10*sizeof(char));
             strcpy(funcionDinamico, palabra);
             tipo = diccionario_obtenerValor(funcion_dic, funcionDinamico);//obtiene la descripcion del token
-            if(!strcmp(tipo, "num")){
-                if(!strcmp(funcionDinamico, "pi")){
-                    tokenActual = agregar_token(tokenActual, funcionDinamico, (char*)tipo, y, acos(-1.0));
+            if(tipo != NULL){
+                if(!strcmp(tipo, "num") && tipo != NULL){
+                    if(!strcmp(funcionDinamico, "pi")){
+                        tokenActual = agregar_token(tokenActual, funcionDinamico, (char*)tipo, y, acos(-1.0));
 
+                    }else{
+                        tokenActual = agregar_token(tokenActual, funcionDinamico, (char*)tipo, y, 2.718281828459045);
+                    }
                 }else{
-                    tokenActual = agregar_token(tokenActual, funcionDinamico, (char*)tipo, y, 2.718281828459045);
+                    tokenActual = agregar_token(tokenActual, funcionDinamico, (char*)tipo, y, 0.0);
                 }
             }else{
-                tokenActual = agregar_token(tokenActual, funcionDinamico, (char*)tipo, y, 0.0);
+                error = 2;
+                break;
             }
             //aumentar la posicion de la linea
-            printf("%s", tipo);
             i = j-1;
             y++;
-
         }
     }
     tokenActual = agregar_token(tokenActual, "#", "End", y, 0.0);
     //Imprime todos los datos de la estructura que almacena los tokens
-    printf("\nPresentacon de datos\n");
+    // printf("\nPresentacon de datos\n");
     expTokemizada = comeToFirstValue(tokenActual);
-    printAllTokens(expTokemizada);
-    
+    // printAllTokens(expTokemizada);
+}
+
+void analizadorSintactico(){
     if(error != 0){
         printf("Error");
     }else{
         float temp = expr();
         printf("\n%f", temp);
     }
+}
 
+int main(){
+     /*Obtener operacion a procesar*/
+    char  operacion[30];
+    printf("Ingrese la operación: ");
+    scanf("%s", operacion);
+    
+    analizadorLexico(operacion);
+
+    analizadorSintactico();
     return 0;
 }
